@@ -6,23 +6,68 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import Feature from '../components/feature';
 import {dummyMessages} from '../constants';
+import Voice from '@react-native-community/voice';
 const HomeScreen = () => {
   const [messege, setMesseges] = useState(dummyMessages);
   const [recording, setRecording] = useState(false);
   const [speaking, setSpeaking] = useState(false);
+  const [result,setResult] = useState('')
+  const speechStartHandler = e => {
+    console.log('speach Start Handler');
+  };
+  const speechEndHandler = e => {
+    console.log('speach End Handler');
+    setRecording(false);
+  };
+
+  const speechResultHandler = e => {
+    console.log('speach Result Handler', e);
+    const text = e.value[0]
+    setResult(text)
+  };
+  const speechErrorHandler = e => {
+    console.log('speach Error Handler', e);
+  };
   const clear = () => {
-    setMesseges([])
-  }
+    setMesseges([]);
+  };
   const stopSpeaking = () => {
-    setSpeaking(false)
-  }
+    setSpeaking(false);
+  };
+  const startRecording = async () => {
+    setRecording(true);
+    try {
+      await Voice.start('en-GB');
+    } catch (error) {
+      console.log('this error from Voice Start', error);
+    }
+  };
+  const stopRecording = async () => {
+    
+    try {
+      await Voice.stop();
+      setRecording(false)
+    } catch (error) {
+      console.log('this error from Voice Start', error);
+    }
+  };
+  useEffect(() => {
+    Voice.onSpeechStart = speechStartHandler;
+    Voice.onSpeechEnd = speechEndHandler;
+    Voice.onSpeechResults = speechResultHandler;
+    Voice.onSpeechError = speechErrorHandler;
+    return () => {
+      Voice.destroy().then(Voice.removeAllListeners);
+    };
+  }, []);
+  console.log(result)
   return (
     <View className="flex-1 flex bg-white">
       <SafeAreaView className="flex flex-1 mx-5">
@@ -93,44 +138,43 @@ const HomeScreen = () => {
           <Feature />
         )}
       </SafeAreaView>
-        <View className="flex  justify-center items-center">
-          {recording ? (
-            <TouchableOpacity>
-              <Image
-                style={{width: hp(10), height: hp(10)}}
-                className="rounded-full"
-                source={require('../assets/images/voiceLoading.gif')}
-              />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity>
-              <Image
-                style={{width: hp(10), height: hp(10)}}
-                className="rounded-full"
-                source={require('../assets/images/recordingIcon.png')}
-              />
-            </TouchableOpacity>
-          )}
+      <View className="flex  justify-center items-center">
+        {recording ? (
+          <TouchableOpacity onPress={stopRecording}>
+            {/* {Recording  Stop button} */}
+            <Image
+              style={{width: hp(10), height: hp(10)}}
+              className="rounded-full"
+              source={require('../assets/images/voiceLoading.gif')}
+            />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={startRecording}>
+             {/* {Recording  Start button} */}
+            <Image
+              style={{width: hp(10), height: hp(10)}}
+              className="rounded-full"
+              source={require('../assets/images/recordingIcon.png')}
+            />
+          </TouchableOpacity>
+        )}
 
-          {
-            messege.length>0 && (
-                <TouchableOpacity
-                onPress={clear}
-                className='bg-neutral-400 rounded-2xl p-2  absolute right-10'>
-                    <Text className='text-white text-lg font-semibold'>Clear</Text>
-                </TouchableOpacity>
-            )
-          }
-          
-          {
-            speaking && (
-                <TouchableOpacity onPress={stopSpeaking}   
-                className='bg-red-400 rounded-2xl p-2  absolute left-10'>
-                    <Text className='text-white text-lg font-semibold'>Stop</Text>
-                </TouchableOpacity>
-            )
-          }
-        </View>
+        {messege.length > 0 && (
+          <TouchableOpacity
+            onPress={clear}
+            className="bg-neutral-400 rounded-2xl p-2  absolute right-10">
+            <Text className="text-white text-lg font-semibold">Clear</Text>
+          </TouchableOpacity>
+        )}
+
+        {speaking && (
+          <TouchableOpacity
+            onPress={stopSpeaking}
+            className="bg-red-400 rounded-2xl p-2  absolute left-10">
+            <Text className="text-white text-lg font-semibold">Stop</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 };

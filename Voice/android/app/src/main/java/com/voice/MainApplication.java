@@ -1,4 +1,4 @@
-package com.task;
+package com.voice;
 
 import android.app.Application;
 import com.facebook.react.PackageList;
@@ -9,8 +9,7 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactNativeHost;
 import com.facebook.soloader.SoLoader;
 import java.util.List;
-import com.wenkesj.voice.VoicePackage;
-//import com.christopherdro.htmltopdf.RNHTMLtoPDFPackage;
+
 public class MainApplication extends Application implements ReactApplication {
 
   private final ReactNativeHost mReactNativeHost =
